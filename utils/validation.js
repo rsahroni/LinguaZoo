@@ -3,7 +3,9 @@ import { translateToEnglish } from './translate';
 // Kata kunci untuk mengidentifikasi definisi yang berhubungan dengan hewan
 const ANIMAL_KEYWORDS = [
     'animal', 'mammal', 'bird', 'fish', 'insect', 'reptile', 'amphibian',
-    'creature', 'species', 'fauna', 'beast', 'livestock', 'poultry'
+    'creature', 'species', 'fauna', 'beast', 'livestock', 'poultry', 'arthropod',
+    'vertebrate', 'invertebrate', 'domestic', 'wildlife', 'chilopoda', 'arachnid',
+    'crustacean', 'annelid', 'mollusk', 'echinoderm', 'cnidarian'
 ];
 
 /**
@@ -24,6 +26,7 @@ export const isLikelyAnimal = async (indonesianWord) => {
         const data = await response.json();
         const definitions = JSON.stringify(data[0].meanings).toLowerCase();
 
+        console.log(`Definitions for "${indonesianWord}" (${englishWord}):`, definitions);
         return ANIMAL_KEYWORDS.some(keyword => definitions.includes(keyword));
     } catch (error) {
         console.error('Validation error:', error);

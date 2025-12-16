@@ -16,6 +16,7 @@ export default function HostPanel({
     isStartingGame,
     onToggleLanguage,
     onManageAnimals,
+    appVersion,
 }) {
     return (
         <View style={styles.pageContainer}>
@@ -88,6 +89,7 @@ export default function HostPanel({
             </ScrollView>
             <View style={styles.footerContainer}>
                 <CustomButton title="Koleksi Hewan" onPress={onManageAnimals} color="#FF6F61" />
+                <Text style={styles.versionText}>Versi {appVersion}</Text>
             </View>
         </View>
     );
@@ -145,5 +147,12 @@ const styles = StyleSheet.create({
         borderTopWidth: 1,
         borderTopColor: '#e0e0e0',
         backgroundColor: '#FFF8E7',
+    },
+    versionText: {
+        marginTop: 8,
+        fontSize: 12,
+        fontFamily: 'PlaypenSans-Regular',
+        color: '#aaa',
+        textAlign: 'center',
     },
 });

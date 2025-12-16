@@ -13,6 +13,7 @@ import useGameLogic from './hooks/useGameLogic';
 import { translateToEnglish } from './utils/translate';
 import { ANIMAL_SEED_DATA } from './data/seedData';
 import { isLikelyAnimal } from './utils/validation';
+import appConfig from './app.json';
 
 export default function App() {
   const [language, setLanguage] = useState('IND'); // 'IND' | 'ENG'
@@ -285,6 +286,7 @@ export default function App() {
             isStartingGame={isAddingAnimal}
             onToggleLanguage={toggleLanguage}
             onManageAnimals={() => setIsManaging(true)}
+            appVersion={appConfig.expo.version}
           />
         )}
       </View>
