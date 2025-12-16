@@ -1,7 +1,8 @@
 import React from 'react';
-import { View, Text, StyleSheet, Button } from 'react-native';
+import { View, Text, StyleSheet, Alert } from 'react-native';
 import WordBox from './WordBox';
 import Keyboard from './Keyboard';
+import CustomButton from './CustomButton';
 
 export default function GameBoard({
     clue,
@@ -9,7 +10,6 @@ export default function GameBoard({
     correctLetters,
     wrongLetters,
     handleGuess,
-    resetGame,
     onExit,
 }) {
     // Calculate lives based on word length: 75% of length, min 5, max 8.
@@ -20,55 +20,81 @@ export default function GameBoard({
     const isWin = word && word.split('').every(ch => ch === ' ' || correctLetters.includes(ch));
     const isLose = wrongLetters.length >= maxLives;
 
+    const handleExitPress = () => {
+        Alert.alert(
+            "Keluar dari Permainan?",
+            "Kamu yakin mau keluar? Permainan saat ini akan berakhir.",
+            [
+                { text: "Lanjut Main", style: "cancel" },
+                { text: "Ya, Keluar", onPress: onExit, style: "destructive" },
+            ]
+        );
+    };
+
+    const handleFinishPress = () => {
+        // Fungsi onExit sudah mereset game dan kembali ke menu utama
+        onExit();
+    };
+
     return (
-        <View style={styles.container}>
-            <View style={styles.headerRow}>
-                <Text style={styles.header}>LinguaZoo</Text>
-                <Button title="Keluar" onPress={onExit} color="#FF6F61" />
-            </View>
-            <Text style={styles.clue}>Clue: {clue}</Text>
-
-            <WordBox word={word} correctLetters={correctLetters} />
-
-            <View style={styles.statusRow}>
-                <Text style={styles.status}>Wrong: {wrongLetters.join(' ')}</Text>
-                <Text style={styles.status}>Lives: {Math.max(0, maxLives - wrongLetters.length)}</Text>
-            </View>
-
-            {!isWin && !isLose ? (
-                <Keyboard onPressLetter={handleGuess} disabledLetters={[...correctLetters, ...wrongLetters]} />
-            ) : (
-                <View style={styles.resultBox}>
-                    <Text style={styles.resultText}>
-                        {isWin ? 'Kamu menang! 🎉' : 'Kamu kalah! 😅'}
-                    </Text>
-                    <Text style={styles.answer}>Jawaban: {word}</Text>
-                    <View style={styles.actions}>
-                        <View style={{ flex: 1 }}>
-                            <Button title="Main lagi" onPress={resetGame} />
-                        </View>
-                    </View>
+        <View style={styles.pageContainer}>
+            <View style={styles.mainContent}>
+                <View style={styles.headerRow}>
+                    <Text style={styles.header}>LinguaZoo</Text>
                 </View>
-            )}
+                <Text style={styles.clue}>Clue: {clue}</Text>
+
+                <WordBox word={word} correctLetters={correctLetters} />
+
+                <View style={styles.statusRow}>
+                    <Text style={styles.status}>Wrong: {wrongLetters.join(' ')}</Text>
+                    <Text style={styles.status}>Lives: {Math.max(0, maxLives - wrongLetters.length)}</Text>
+                </View>
+
+                {!isWin && !isLose ? (
+                    <Keyboard onPressLetter={handleGuess} disabledLetters={[...correctLetters, ...wrongLetters]} />
+                ) : (
+                    <View style={styles.resultBox}>
+                        <Text style={styles.resultText}>
+                            {isWin ? 'Kamu menang! 🎉' : 'Kamu kalah! 😅'}
+                        </Text>
+                        <Text style={styles.answer}>Jawaban: {word}</Text>
+                    </View>
+                )}
+            </View>
+
+            {/* Tombol Aksi di Bagian Bawah */}
+            <View style={styles.actionsContainer}>
+                {!isWin && !isLose
+                    ? <CustomButton title="Keluar dari Permainan" onPress={handleExitPress} color="#e74c3c" />
+                    : <CustomButton title="Selesai" onPress={handleFinishPress} />
+                }
+            </View>
         </View>
     );
 }
 
 const styles = StyleSheet.create({
-    container: { flex: 1, padding: 24 },
+    pageContainer: { flex: 1 },
+    mainContent: { flex: 1, padding: 20 },
     headerRow: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        marginTop: 50, // Added to push the header down
+        // marginTop: 20, // Added to push the header down
         marginBottom: 12,
     },
-    header: { fontSize: 20, fontWeight: 'bold', color: '#FF6F61' },
-    clue: { fontSize: 16, marginBottom: 16, color: '#333' },
+    header: { fontSize: 24, fontFamily: 'PlaypenSans-Bold', color: '#FF6F61' },
+    clue: { fontSize: 18, fontFamily: 'PlaypenSans-Regular', marginBottom: 16, color: '#333' },
     statusRow: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 12 },
-    status: { fontSize: 14, color: '#333' },
+    status: { fontSize: 16, fontFamily: 'PlaypenSans-Regular', color: '#333' },
     resultBox: { marginTop: 20, gap: 10 },
-    resultText: { fontSize: 18, fontWeight: 'bold' },
-    answer: { fontSize: 16 },
-    actions: { flexDirection: 'row', gap: 10, marginTop: 10 },
+    resultText: { fontSize: 20, fontFamily: 'PlaypenSans-Bold' },
+    answer: { fontSize: 18, fontFamily: 'PlaypenSans-Regular' },
+    actionsContainer: {
+        padding: 20,
+        borderTopWidth: 1,
+        borderTopColor: '#e0e0e0',
+        backgroundColor: '#FFF8E7',
+    },
 });

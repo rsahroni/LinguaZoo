@@ -24,7 +24,7 @@ export default function Keyboard({ onPressLetter, disabledLetters = [] }) {
 }
 
 const styles = StyleSheet.create({
-    grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 16 },
+    grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 16, justifyContent: 'center' },
     key: {
         width: 36,
         height: 36,

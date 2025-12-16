@@ -38,22 +38,24 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
     },
     box: {
-        width: 35,
-        height: 45,
-        borderTopWidth: 3,
-        borderBottomWidth: 3,
+        width: 45,
+        height: 55,
+        borderTopWidth: 2,
+        borderBottomWidth: 2,
         borderLeftWidth: 2,
         borderRightWidth: 2,
         borderRadius: 10,
         backgroundColor: '#FFF',
         borderColor: '#333',
-        marginHorizontal: 4,
-        alignItems: 'center',
+        marginHorizontal: 2,
         justifyContent: 'center',
     },
     char: {
-        fontSize: 28,
-        fontWeight: 'bold',
+        fontSize: 35,
+        fontFamily: 'PlaypenSans-Bold',
         color: '#000',
+        textAlign: 'center', // Memastikan center secara horizontal
+        textAlignVertical: 'center',
+        lineHeight: 45, // Menyamakan dengan tinggi box untuk center vertikal
     },
 });

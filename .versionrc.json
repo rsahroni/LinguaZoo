@@ -1,0 +1,15 @@
+{
+  "bumpFiles": [
+    {
+      "filename": "package.json",
+      "type": "json"
+    },
+    {
+      "filename": "app.json",
+      "updater": {
+        "readVersion": "expo.version",
+        "writeVersion": "expo.version"
+      }
+    }
+  ]
+}

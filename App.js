@@ -1,23 +1,31 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, Alert, ScrollView, TouchableOpacity } from 'react-native';
+import React, { useCallback, useEffect, useState } from 'react';
+import { View, StyleSheet, Alert, Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useFonts } from 'expo-font';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as ScreenOrientation from 'expo-screen-orientation';
 
 import GameBoard from './components/GameBoard';
 import AnimalList from './components/AnimalList';
+import ManagementHeader from './components/ManagementHeader';
+import HostPanel from './components/HostPanel';
 import useGameLogic from './hooks/useGameLogic';
 import { translateToEnglish } from './utils/translate';
 import { ANIMAL_SEED_DATA } from './data/seedData';
+import { isLikelyAnimal } from './utils/validation';
 
 export default function App() {
   const [language, setLanguage] = useState('IND'); // 'IND' | 'ENG'
   const [animals, setAnimals] = useState([]);
-  const [newAnimal, setNewAnimal] = useState('');
-  const [editAnimal, setEditAnimal] = useState(null);
-  const [editText, setEditText] = useState('');
   const [suggestions, setSuggestions] = useState([]);
   const [isManaging, setIsManaging] = useState(false); // State for management UI
+  const [isAddingAnimal, setIsAddingAnimal] = useState(false); // Loading state for validation
+  const [lastRandomAnimal, setLastRandomAnimal] = useState(null); // Track the last picked animal
+
+  const [fontsLoaded] = useFonts({
+    'PlaypenSans-Regular': require('./assets/fonts/PlaypenSans-Regular.ttf'),
+    'PlaypenSans-Bold': require('./assets/fonts/PlaypenSans-Bold.ttf'),
+  });
 
   const {
     word,
@@ -52,56 +60,97 @@ export default function App() {
     await AsyncStorage.setItem('linguazoo_animals', JSON.stringify(list));
   };
 
-  const addAnimal = async () => {
-    const name = newAnimal.trim().toUpperCase();
+  const addAnimal = useCallback(async (animalName, options = {}) => { // Mengembalikan boolean
+    setIsAddingAnimal(true);
+    const { showDuplicateAlert = true } = options; // Default to showing the alert
+
+    const name = animalName.trim().toUpperCase();
     if (!name) return;
-    const eng = (await translateToEnglish(name)).toUpperCase();
-    const exists = animals.some(a => a.IND === name || a.ENG === eng);
+
+    const exists = animals.some(a => a.IND === name);
     if (exists) {
-      Alert.alert('Duplikat', 'Hewan sudah ada dalam daftar.');
-      return;
+      if (showDuplicateAlert) {
+        Alert.alert('Sudah Ada!', 'Hore! Hewan ini sudah ada di kebun binatang kita.');
+      }
+      setIsAddingAnimal(false);
+      return false; // Gagal karena duplikat
     }
-    const updated = [...animals, { IND: name, ENG: eng }];
-    await persistAnimals(updated);
-    setNewAnimal('');
-  };
 
-  const startEdit = (item) => {
-    setEditAnimal(item);
-    if (item) {
-      setEditText(item.IND);
-    } else {
-      setEditText(''); // Clear text on cancel
+    // Validasi apakah ini nama hewan yang valid
+    const isValidAnimal = await isLikelyAnimal(name);
+    if (!isValidAnimal && showDuplicateAlert) { // Hanya tampilkan alert saat menambah manual
+      Alert.alert('Hmm...', `Sepertinya "${name}" bukan nama hewan, deh. Coba periksa lagi, yuk!`);
+      setIsAddingAnimal(false);
+      return false; // Gagal karena tidak valid
     }
+
+    const name_eng = (await translateToEnglish(name)).toUpperCase();
+    const updated = [...animals, { IND: name, ENG: name_eng }];
+    await persistAnimals(updated);
+    setIsAddingAnimal(false);
+    return true; // Berhasil ditambahkan
+  }, [animals]); // This function only changes if the `animals` list changes
+
+  const resetAnimals = () => {
+    Alert.alert(
+      "Mulai dari Awal?",
+      "Kamu yakin mau mengosongkan kebun binatang dan mulai dari awal? Hewan-hewan yang sudah kamu tambah akan pergi, lho.",
+      [
+        {
+          text: "Batal",
+          style: "cancel",
+        },
+        {
+          text: "Reset",
+          onPress: () => persistAnimals(ANIMAL_SEED_DATA),
+          style: "destructive",
+        },
+      ]
+    );
   };
 
-  const confirmEdit = async () => {
-    const name = editText.trim().toUpperCase();
-    if (!name || !editAnimal) return;
-    const eng = (await translateToEnglish(name)).toUpperCase();
-    const updated = animals.map((a) =>
-      a.IND === editAnimal.IND ? { IND: name, ENG: eng } : a
-    ); // Compare by ID to be safer
-    await persistAnimals(updated);
-    setEditAnimal(null);
-    setEditText('');
-  };
-
-  const deleteAnimal = async (item) => {
-    const updated = animals.filter(a => a !== item);
-    await persistAnimals(updated);
+  const deleteAnimal = (item) => {
+    Alert.alert(
+      "Dadah, Hewan!",
+      `Kamu yakin mau bilang dadah ke "${item.IND}"? Dia akan keluar dari kebun binatang, lho.`,
+      [
+        {
+          text: "Batal",
+          style: "cancel",
+        },
+        {
+          text: "Hapus",
+          onPress: () => persistAnimals(animals.filter(a => a.IND !== item.IND)),
+          style: "destructive",
+        },
+      ]
+    );
   };
 
   const pickRandomAnimal = () => {
     if (animals.length === 0) {
-      Alert.alert('Kosong', 'Tambahkan hewan terlebih dahulu.');
+      Alert.alert('Oh, Kosong!', 'Ups, kebun binatangnya masih kosong. Tambah hewan dulu, yuk!');
       return;
     }
-    const idx = Math.floor(Math.random() * animals.length);
-    const chosen = animals[idx][language.toUpperCase()];
-    setWord(chosen);
-    setClue('Tebak nama hewan ini!');
-    setGameStarted(true);
+
+    // If there's only one animal, just pick it.
+    if (animals.length === 1) {
+      const chosen = animals[0];
+      setWord(chosen[language.toUpperCase()]);
+      setClue('');
+      setLastRandomAnimal(chosen);
+      return;
+    }
+
+    let chosen;
+    do {
+      const idx = Math.floor(Math.random() * animals.length);
+      chosen = animals[idx];
+    } while (lastRandomAnimal && chosen.IND === lastRandomAnimal.IND); // Ensure it's not the same as the last one
+
+    setLastRandomAnimal(chosen); // Update the last picked animal
+    setWord(chosen[language.toUpperCase()]);
+    setClue('');
   };
 
   const toggleLanguage = () => {
@@ -113,6 +162,15 @@ export default function App() {
     resetGame(); // Resets correct/wrong letters from the hook
     setWord('');   // Clears the manual word input
     setClue('');   // Clears the manual clue input
+    setSuggestions([]); // Clears the suggestions list
+  };
+
+  const handleWordInputBlur = () => {
+    // Memberikan jeda singkat agar penekanan pada item saran sempat terdaftar
+    // sebelum daftar sarannya dihilangkan.
+    setTimeout(() => {
+      setSuggestions([]);
+    }, 1000);
   };
 
   // Handle word input change for suggestions
@@ -130,87 +188,66 @@ export default function App() {
     }
   };
 
-  // Header for the Animal Management screen
-  const renderManagementHeader = () => (
-    <>
-      <View style={styles.headerRow}>
-        <Text style={styles.title}>Manajemen Hewan</Text>
-        <Button title="Kembali" onPress={() => setIsManaging(false)} />
-      </View>
-      <Text style={styles.label}>Tambah hewan (Indonesia)</Text>
-      <TextInput placeholder="Contoh: KUCING" value={newAnimal} onChangeText={setNewAnimal} style={styles.input} />
-      <Button title="Tambah" onPress={addAnimal} />
-      <Text style={[styles.title, { marginTop: 20, fontSize: 18 }]}>Daftar Hewan</Text>
-    </>
-  );
+  const handleStartGame = async () => {
+    if (!word || !clue) {
+      Alert.alert('Tunggu Dulu!', 'Jangan lupa isi nama hewan dan petunjuknya ya, atau pilih hewan acak!');
+      return;
+    }
 
-  // Header for the main Host Panel
-  const renderHostPanelHeader = () => (
-    <>
-      <Text style={styles.title}>LinguaZoo — Host Panel</Text>
-      <Text style={styles.label}>Masukkan kata dan clue manual</Text>
-      <TextInput
-        placeholder="Kata (contoh: KUCING)"
-        value={word}
-        onChangeText={handleWordInputChange}
-        style={styles.input}
-      />
-      {suggestions.length > 0 && (
-        <View style={styles.suggestionContainer}>
-          {suggestions.map((item) => (
-            <TouchableOpacity
-              key={item.IND}
-              style={styles.suggestionItem}
-              onPress={() => {
-                setWord(item.IND);
-                setSuggestions([]);
-              }}>
-              <Text>{item.IND}</Text>
-            </TouchableOpacity>
-          ))}
-        </View>
-      )}
-      <TextInput
-        placeholder="Clue (contoh: hewan berkaki empat)"
-        value={clue}
-        onChangeText={setClue}
-        style={[styles.input, { marginTop: suggestions.length > 0 ? 10 : 0 }]}
-      />
-      <View style={styles.row}>
-        <View style={styles.rowBtn}>
-          <Button title="Mulai Game" onPress={() => {
-            if (!word || !clue) {
-              Alert.alert('Lengkapi', 'Isi kata dan clue terlebih dahulu atau gunakan Random.');
-              return;
+    const trimmedWord = word.trim().toUpperCase();
+    const isExisting = animals.some(a => a.IND === trimmedWord);
+
+    if (isExisting) {
+      // Hewan sudah ada
+      Alert.alert(
+        "Siap Main?",
+        `Asyik! Kita akan main tebak-tebakan dengan "${trimmedWord}". Sudah siap?`,
+        [
+          { text: "Ganti hewan", style: "cancel" },
+          { text: "Mulai!", onPress: () => setGameStarted(true) },
+        ]
+      );
+      return;
+    }
+
+    // Hewan baru, lakukan validasi terlebih dahulu
+    setIsAddingAnimal(true);
+    const isValid = await isLikelyAnimal(trimmedWord);
+    setIsAddingAnimal(false);
+
+    if (!isValid) {
+      Alert.alert('Hmm...', `Sepertinya "${trimmedWord}" bukan nama hewan, deh. Coba periksa lagi, yuk!`);
+      return;
+    }
+
+    // Jika valid, baru tampilkan konfirmasi
+    Alert.alert(
+      "Hewan Baru!",
+      `Wow, "${trimmedWord}" akan jadi penghuni baru kebun binatang kita! Kamu mau pakai hewan ini untuk main?`,
+      [
+        { text: "Pilih lagi", style: "cancel" },
+        {
+          text: "Ya, pakai ini!",
+          onPress: async () => {
+            // Panggil addAnimal tanpa validasi ulang, karena sudah divalidasi
+            const success = await addAnimal(word, { showDuplicateAlert: false });
+            if (success) {
+              setGameStarted(true);
             }
-            // Auto-add word if it's new
-            const isNewWord = !animals.some(a => a.IND === word.trim());
-            if (isNewWord) {
-              // Use a temporary state for the new word to avoid race conditions
-              addAnimal(word.trim());
-            }
-            setGameStarted(true);
-          }} />
-        </View>
-        <View style={styles.rowBtn}>
-          <Button title="Random Hewan" onPress={pickRandomAnimal} />
-        </View>
-      </View>
+          },
+        },
+      ]
+    );
+  };
 
-      <View style={styles.row}>
-        <View style={styles.rowBtn}>
-          <Button
-            title={language === 'IND' ? 'Bahasa: Indonesia' : 'Bahasa: English'}
-            onPress={toggleLanguage}
-          />
-        </View>
-      </View>
+  const handleSuggestionPress = (selectedWord) => {
+    setWord(selectedWord);
+    setSuggestions([]);
+  };
 
-      <View style={{ marginTop: 30 }}>
-        <Button title="Manajemen Hewan" onPress={() => setIsManaging(true)} color="#FF6F61" />
-      </View>
-    </>
-  );
+  if (!fontsLoaded) {
+    return null; // Atau tampilkan loading screen
+  }
 
   return (
     <SafeAreaView style={styles.safe}>
@@ -222,25 +259,33 @@ export default function App() {
             correctLetters={correctLetters}
             wrongLetters={wrongLetters}
             handleGuess={handleGuess}
-            resetGame={resetGame}
             onExit={exitAndResetGame}
           />
         ) : isManaging ? (
           // Animal Management UI
           <AnimalList
             animalList={animals}
-            editAnimal={editAnimal}
-            editText={editText}
-            setEditText={setEditText}
-            startEdit={startEdit}
-            confirmEdit={confirmEdit}
             deleteAnimal={deleteAnimal}
             language={language}
-            ListHeaderComponent={renderManagementHeader}
+            ListHeaderComponent={<ManagementHeader onBack={() => setIsManaging(false)} onAddAnimal={addAnimal} isAdding={isAddingAnimal} animalCount={animals.length} onReset={resetAnimals} />}
           />
         ) : (
           // Main Host Panel UI
-          <ScrollView contentContainerStyle={styles.leftPanel}>{renderHostPanelHeader()}</ScrollView>
+          <HostPanel
+            word={word}
+            clue={clue}
+            suggestions={suggestions}
+            language={language}
+            onWordChange={handleWordInputChange}
+            onWordInputBlur={handleWordInputBlur}
+            onClueChange={setClue}
+            onSuggestionPress={handleSuggestionPress}
+            onStartGame={handleStartGame}
+            onRandomAnimal={pickRandomAnimal}
+            isStartingGame={isAddingAnimal}
+            onToggleLanguage={toggleLanguage}
+            onManageAnimals={() => setIsManaging(true)}
+          />
         )}
       </View>
     </SafeAreaView>
@@ -250,24 +295,4 @@ export default function App() {
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: '#FFF8E7' },
   container: { flex: 1, backgroundColor: '#FFF8E7' },
-  leftPanel: { padding: 20 },
-  title: { fontSize: 20, fontWeight: 'bold', marginBottom: 10, color: '#FF6F61' },
-  label: { fontSize: 14, color: '#444', marginBottom: 8 },
-  input: { borderWidth: 1, borderColor: '#333', padding: 10, marginBottom: 10, borderRadius: 8, backgroundColor: '#fff' },
-  row: { flexDirection: 'row', gap: 10, marginBottom: 10 },
-  rowBtn: { flex: 1 },
-  headerRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  suggestionContainer: {
-    backgroundColor: '#fff',
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: '#ddd',
-    marginBottom: 10,
-  },
-  suggestionItem: {
-    padding: 10,
-    backgroundColor: '#f0f0f0',
-    borderBottomWidth: 1,
-    borderBottomColor: '#ddd',
-  },
 });

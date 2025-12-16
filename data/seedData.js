@@ -47,7 +47,7 @@ export const ANIMAL_SEED_DATA = [
     { "IND": "KADAL", "ENG": "LIZARD" },
     { "IND": "CICAK", "ENG": "LIZARD" },
     { "IND": "BUNGLON", "ENG": "CHAMELEON" },
-    { "IND": "LABA-LABA", "ENG": "SPIDER" },
+    { "IND": "LABA LABA", "ENG": "SPIDER" },
     { "IND": "SEMUT", "ENG": "ANT" },
     { "IND": "LEBAH", "ENG": "BEE" },
     { "IND": "KUPU KUPU", "ENG": "BUTTERFLY" },
@@ -96,5 +96,14 @@ export const ANIMAL_SEED_DATA = [
     { "IND": "PUMA", "ENG": "PUMA" },
     { "IND": "HYENA", "ENG": "HYENA" },
     { "IND": "ALPAKA", "ENG": "ALPACA" },
-    { "IND": "LLAMA", "ENG": "LLAMA" }
+    { "IND": "LLAMA", "ENG": "LLAMA" },
+    { "IND": "PANDA MERAH", "ENG": "RED PANDA" },
+    { "IND": "PLATIPUS", "ENG": "PLATYPUS" },
+    { "IND": "WALRUS", "ENG": "WALRUS" },
+    { "IND": "BERUANG KUTUB", "ENG": "POLAR BEAR" },
+    { "IND": "BELUT", "ENG": "EEL" },
+    { "IND": "BISON", "ENG": "BISON" },
+    { "IND": "PELIKAN", "ENG": "PELICAN" },
+    { "IND": "MERAK", "ENG": "PEACOCK" },
+    { "IND": "SALAMANDER", "ENG": "SALAMANDER" }
 ];
