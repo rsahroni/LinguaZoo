@@ -87,6 +87,7 @@ npx expo start
 
 ## 📱 How to Run
 
+```bash
 # Install Expo Go on your mobile device (Android/iOS)
 
 # Run the project
@@ -96,3 +97,4 @@ npx expo start
 # Scan the QR code with Expo Go
 
 # The game will launch directly on your device
+```
