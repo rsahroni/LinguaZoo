@@ -11,6 +11,7 @@
     },
     {
       "filename": "README.md",
+      "type": "plain-text",
       "updater": {
         "readVersion": "version-([0-9]+\\.[0-9]+\\.[0-9]+)-blue\\.svg",
         "writeVersion": "version-{{currentTag}}-blue.svg"
