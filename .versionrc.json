@@ -6,8 +6,7 @@
     },
     {
       "filename": "app.json",
-      "type": "json",
-      "versioner": "json"
+      "updater": "./scripts/app-json-updater.js"
     },
     {
       "filename": "README.md",
