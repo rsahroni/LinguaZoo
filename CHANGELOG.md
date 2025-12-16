@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.3.0](https://github.com/rsahroni/LinguaZoo/compare/v1.2.0...v1.3.0) (2025-12-16)
+
+
+### Features
+
+* Implement app.json version updater script and update .versionrc configuration ([67487e7](https://github.com/rsahroni/LinguaZoo/commit/67487e7211b0302420d89e1be62cef31bf86325a))
+
 ## [1.2.0](https://github.com/rsahroni/LinguaZoo/compare/v1.1.4...v1.2.0) (2025-12-16)
 
 
