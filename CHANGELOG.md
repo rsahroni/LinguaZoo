@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.1.4](https://github.com/rsahroni/LinguaZoo/compare/v1.1.3...v1.1.4) (2025-12-16)
+
+
+### Bug Fixes
+
+* Update README.md structure and enhance versioning updater script ([cc9406d](https://github.com/rsahroni/LinguaZoo/commit/cc9406df0800cb57c56d96f4fc73d4226ebe08b4))
+
 ### [1.1.3](https://github.com/rsahroni/LinguaZoo/compare/v1.1.2...v1.1.3) (2025-12-16)
 
 
