@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.5.1](https://github.com/rsahroni/LinguaZoo/compare/v1.5.0...v1.5.1) (2025-12-18)
+
+
+### Bug Fixes
+
+* Update splash and adaptive icon background color to #FF6F61 ([0dee0b8](https://github.com/rsahroni/LinguaZoo/commit/0dee0b8d9e800fd5ac06a8245213f8391ab48bef)), closes [#FF6F61](https://github.com/rsahroni/LinguaZoo/issues/FF6F61)
+
 ## [1.5.0](https://github.com/rsahroni/LinguaZoo/compare/v1.4.0...v1.5.0) (2025-12-18)
 
 
