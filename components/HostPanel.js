@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, TextInput, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import CustomButton from './CustomButton';
+import AppHeader from './AppHeader';
 
 export default function HostPanel({
     word,
@@ -21,7 +22,7 @@ export default function HostPanel({
     return (
         <View style={styles.pageContainer}>
             <ScrollView contentContainerStyle={styles.container}>
-                <Text style={styles.title}>LinguaZoo</Text>
+                <AppHeader size="large" />
                 <Text style={styles.label}>
                     Masukkan nama hewan dan <Text style={styles.italic}>clue</Text>-nya dulu:
                 </Text>
@@ -97,8 +98,7 @@ export default function HostPanel({
 
 const styles = StyleSheet.create({
     pageContainer: { flex: 1 },
-    container: { padding: 20, paddingBottom: 40 }, // Tambahkan padding bawah agar tidak terpotong
-    title: { fontSize: 24, fontFamily: 'PlaypenSans-Bold', marginBottom: 10, color: '#FF6F61' },
+    container: { padding: 20, paddingBottom: 40 },
     label: { fontSize: 16, fontFamily: 'PlaypenSans-Regular', color: '#444', marginBottom: 8 },
     inputContainer: {
         flexDirection: 'row',

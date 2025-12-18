@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, Alert } from 'react-native';
 import WordBox from './WordBox';
 import Keyboard from './Keyboard';
 import CustomButton from './CustomButton';
+import AppHeader from './AppHeader';
 
 export default function GameBoard({
     clue,
@@ -40,7 +41,7 @@ export default function GameBoard({
         <View style={styles.pageContainer}>
             <View style={styles.mainContent}>
                 <View style={styles.headerRow}>
-                    <Text style={styles.header}>LinguaZoo</Text>
+                    <AppHeader size="large" style={{ marginBottom: 0 }} />
                 </View>
                 <Text style={styles.clue}>Clue: {clue}</Text>
 
@@ -81,10 +82,8 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        // marginTop: 20, // Added to push the header down
         marginBottom: 12,
     },
-    header: { fontSize: 24, fontFamily: 'PlaypenSans-Bold', color: '#FF6F61' },
     clue: { fontSize: 18, fontFamily: 'PlaypenSans-Regular', marginBottom: 16, color: '#333' },
     statusRow: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 12 },
     status: { fontSize: 16, fontFamily: 'PlaypenSans-Regular', color: '#333' },

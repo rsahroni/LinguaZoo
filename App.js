@@ -14,6 +14,7 @@ import { translateToEnglish } from './utils/translate';
 import { ANIMAL_SEED_DATA } from './data/seedData';
 import { isLikelyAnimal } from './utils/validation';
 import appConfig from './app.json';
+import { toProperCase } from './utils/formatters';
 
 export default function App() {
   const [language, setLanguage] = useState('IND'); // 'IND' | 'ENG'
@@ -61,9 +62,9 @@ export default function App() {
     await AsyncStorage.setItem('linguazoo_animals', JSON.stringify(list));
   };
 
-  const addAnimal = useCallback(async (animalName, options = {}) => { // Mengembalikan boolean
+  const addAnimal = useCallback(async (animalName, options = {}) => { // Returns a boolean
     setIsAddingAnimal(true);
-    const { showDuplicateAlert = true } = options; // Default to showing the alert
+    const { showDuplicateAlert = true, showConfirmationPrompt = true } = options; // Add new option
 
     const name = animalName.trim().toUpperCase();
     if (!name) return;
@@ -74,22 +75,60 @@ export default function App() {
         Alert.alert('Sudah Ada!', 'Hore! Hewan ini sudah ada di kebun binatang kita.');
       }
       setIsAddingAnimal(false);
-      return false; // Gagal karena duplikat
+      return false; // Failed because it's a duplicate
     }
 
-    // Validasi apakah ini nama hewan yang valid
-    const isValidAnimal = await isLikelyAnimal(name);
-    if (!isValidAnimal && showDuplicateAlert) { // Hanya tampilkan alert saat menambah manual
+    // Validate if this is a valid animal name
+    const { isValid, englishName, errorType } = await isLikelyAnimal(name);
+    setIsAddingAnimal(false); // Set loading to false after validation attempt
+
+    if (errorType === 'network') {
+      Alert.alert('Koneksi Internet Diperlukan', 'Untuk menambahkan hewan baru, pastikan perangkatmu terhubung ke internet ya!');
+      return false;
+    }
+    if (!isValid && showDuplicateAlert) { // Only show alert on manual add, and if not a network error
       Alert.alert('Hmm...', `Sepertinya "${name}" bukan nama hewan, deh. Coba periksa lagi, yuk!`);
-      setIsAddingAnimal(false);
-      return false; // Gagal karena tidak valid
+      return false; // Failed because it's not a valid animal
+    }
+    if (!isValid && !showDuplicateAlert && errorType === 'word_not_found') {
+      // This case is for handleStartGame where showDuplicateAlert is false,
+      // and we want to show the "not an animal" alert if it's not a network error.
+      Alert.alert('Hmm...', `Sepertinya "${name}" bukan nama hewan, deh. Coba periksa lagi, yuk!`);
+      return false;
     }
 
-    const name_eng = (await translateToEnglish(name)).toUpperCase();
-    const updated = [...animals, { IND: name, ENG: name_eng }];
-    await persistAnimals(updated);
-    setIsAddingAnimal(false);
-    return true; // Berhasil ditambahkan
+    // If confirmation is skipped, add the animal directly
+    if (!showConfirmationPrompt) {
+      const name_eng = englishName ? englishName.toUpperCase() : (await translateToEnglish(name)).toUpperCase();
+      const updated = [...animals, { IND: name, ENG: name_eng }];
+      await persistAnimals(updated);
+      setIsAddingAnimal(false);
+      return true; // Success: animal added directly
+    }
+
+    // If valid, show a confirmation prompt before adding
+    return new Promise(async (resolve) => {
+      const name_eng_for_alert = englishName ? englishName.toUpperCase() : (await translateToEnglish(name)).toUpperCase();
+      Alert.alert(
+        "Tambahkan Hewan Ini?",
+        `Hore! Sepertinya ${toProperCase(name)} (Bahasa Inggris: ${toProperCase(name_eng_for_alert)}) adalah hewan sungguhan. Yakin mau menambahkannya?`,
+        [
+          {
+            text: "Jangan, deh",
+            onPress: () => resolve(false), // Failed: cancelled by user
+            style: "cancel",
+          },
+          {
+            text: "Ya, Tambahkan!",
+            onPress: async () => { // Use name_eng_for_alert here
+              const updated = [...animals, { IND: name, ENG: name_eng_for_alert }];
+              await persistAnimals(updated);
+              resolve(true); // Success: animal added
+            },
+          },
+        ]
+      );
+    });
   }, [animals]); // This function only changes if the `animals` list changes
 
   const resetAnimals = () => {
@@ -167,8 +206,8 @@ export default function App() {
   };
 
   const handleWordInputBlur = () => {
-    // Memberikan jeda singkat agar penekanan pada item saran sempat terdaftar
-    // sebelum daftar sarannya dihilangkan.
+    // Add a short delay to allow suggestion item press to register
+    // before the suggestion list is cleared.
     setTimeout(() => {
       setSuggestions([]);
     }, 1000);
@@ -199,7 +238,7 @@ export default function App() {
     const isExisting = animals.some(a => a.IND === trimmedWord);
 
     if (isExisting) {
-      // Hewan sudah ada
+      // Animal already exists
       Alert.alert(
         "Siap Main?",
         `Asyik! Kita akan main tebak-tebakan dengan "${trimmedWord}". Sudah siap?`,
@@ -211,27 +250,31 @@ export default function App() {
       return;
     }
 
-    // Hewan baru, lakukan validasi terlebih dahulu
+    // New animal, perform validation first
     setIsAddingAnimal(true);
-    const isValid = await isLikelyAnimal(trimmedWord);
+    const { isValid, englishName, errorType } = await isLikelyAnimal(trimmedWord);
     setIsAddingAnimal(false);
 
-    if (!isValid) {
-      Alert.alert('Hmm...', `Sepertinya "${trimmedWord}" bukan nama hewan, deh. Coba periksa lagi, yuk!`);
+    if (errorType === 'network') {
+      Alert.alert('Koneksi Internet Diperlukan', 'Untuk memulai permainan dengan hewan baru, pastikan perangkatmu terhubung ke internet ya!');
       return;
     }
 
-    // Jika valid, baru tampilkan konfirmasi
+    if (!isValid) { // If not valid (and not a network error, handled above)
+      Alert.alert('Hmm...', `Sepertinya "${trimmedWord}" bukan nama hewan, deh. Coba periksa lagi, yuk!`);
+      return;
+    }
+    // If valid, then show the confirmation prompt
     Alert.alert(
       "Hewan Baru!",
-      `Wow, "${trimmedWord}" akan jadi penghuni baru kebun binatang kita! Kamu mau pakai hewan ini untuk main?`,
+      `Wow, "${trimmedWord}" (${englishName.toUpperCase()}) akan jadi penghuni baru! Kamu mau pakai hewan ini untuk main?`,
       [
         { text: "Pilih lagi", style: "cancel" },
         {
           text: "Ya, pakai ini!",
           onPress: async () => {
-            // Panggil addAnimal tanpa validasi ulang, karena sudah divalidasi
-            const success = await addAnimal(word, { showDuplicateAlert: false });
+            // Call addAnimal without re-validation, as it's already been validated
+            const success = await addAnimal(word, { showDuplicateAlert: false, showConfirmationPrompt: false });
             if (success) {
               setGameStarted(true);
             }
@@ -247,7 +290,7 @@ export default function App() {
   };
 
   if (!fontsLoaded) {
-    return null; // Atau tampilkan loading screen
+    return null; // Or return a loading screen
   }
 
   return (
