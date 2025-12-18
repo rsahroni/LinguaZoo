@@ -119,7 +119,7 @@ const styles = StyleSheet.create({
         backgroundColor: '#fff',
         marginBottom: 10,
     },
-    input: { flex: 1, fontFamily: 'PlaypenSans-Regular', padding: 10, },
+    input: { flex: 1, fontFamily: 'PlaypenSans-Regular', padding: 10, includeFontPadding: false },
     italic: { fontStyle: 'italic' },
     row: { flexDirection: 'row', gap: 10, marginBottom: 10 },
     rowBtn: { flex: 1 },

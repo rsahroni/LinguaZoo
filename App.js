@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { View, StyleSheet, Alert, Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { StatusBar } from 'expo-status-bar';
+import * as SplashScreen from 'expo-splash-screen';
 import { useFonts } from 'expo-font';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as ScreenOrientation from 'expo-screen-orientation';
@@ -17,6 +18,9 @@ import { isLikelyAnimal } from './utils/validation';
 import appConfig from './app.json';
 import { toProperCase } from './utils/formatters';
 
+// Prevent the splash screen from auto-hiding before asset loading is complete.
+SplashScreen.preventAutoHideAsync();
+
 export default function App() {
   const [language, setLanguage] = useState('IND'); // 'IND' | 'ENG'
   const [animals, setAnimals] = useState([]);
@@ -24,6 +28,7 @@ export default function App() {
   const [isManaging, setIsManaging] = useState(false); // State for management UI
   const [isAddingAnimal, setIsAddingAnimal] = useState(false); // Loading state for validation
   const [lastRandomAnimal, setLastRandomAnimal] = useState(null); // Track the last picked animal
+  const [isAppReady, setIsAppReady] = useState(false);
 
   const [fontsLoaded] = useFonts({
     'PlaypenSans-Regular': require('./assets/fonts/PlaypenSans-Regular.ttf'),
@@ -45,17 +50,31 @@ export default function App() {
 
   useEffect(() => {
     ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.PORTRAIT);
-    (async () => {
-      const saved = await AsyncStorage.getItem('linguazoo_animals');
-      const savedAnimals = saved ? JSON.parse(saved) : [];
-      if (savedAnimals.length > 0) {
-        setAnimals(savedAnimals);
-      } else {
-        // Use the larger seed data list
-        setAnimals(ANIMAL_SEED_DATA);
-        await AsyncStorage.setItem('linguazoo_animals', JSON.stringify(ANIMAL_SEED_DATA));
+    async function prepare() {
+      try {
+        // Load animals from storage
+        const saved = await AsyncStorage.getItem('linguazoo_animals');
+        const savedAnimals = saved ? JSON.parse(saved) : [];
+        if (savedAnimals.length > 0) {
+          setAnimals(savedAnimals);
+        } else {
+          // Use the larger seed data list
+          setAnimals(ANIMAL_SEED_DATA);
+          await AsyncStorage.setItem('linguazoo_animals', JSON.stringify(ANIMAL_SEED_DATA));
+        }
+
+        // Artificially delay for 2 seconds to show the splash screen longer
+        await new Promise(resolve => setTimeout(resolve, 2000));
+
+      } catch (e) {
+        console.warn(e);
+      } finally {
+        // Tell the application to render
+        setIsAppReady(true);
       }
-    })();
+    }
+
+    prepare();
   }, []);
 
   const persistAnimals = async (list) => {
@@ -290,14 +309,25 @@ export default function App() {
     setSuggestions([]);
   };
 
-  if (!fontsLoaded) {
-    return null; // Or return a loading screen
+  const onLayoutRootView = useCallback(async () => {
+    if (isAppReady && fontsLoaded) {
+      // This tells the splash screen to hide immediately! If we call this after
+      // `setIsAppReady`, then we may see a blank screen while the app is
+      // loading its initial state and rendering its first pixels. So instead,
+      // we hide the splash screen once we know the root view has already
+      // performed layout.
+      await SplashScreen.hideAsync();
+    }
+  }, [isAppReady, fontsLoaded]);
+
+  if (!isAppReady || !fontsLoaded) {
+    return null;
   }
 
   return (
     <SafeAreaView style={styles.safe}>
       <StatusBar hidden />
-      <View style={styles.container}>
+      <View style={styles.container} onLayout={onLayoutRootView}>
         {gameStarted ? (
           <GameBoard
             clue={clue}

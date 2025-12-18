@@ -36,7 +36,7 @@ A fun and interactive Hangman-style educational game designed for kids to learn 
 - **Storage**: `@react-native-async-storage/async-storage` for persisting the animal list
 - **Fonts**: `expo-font` for loading custom fonts
 - **APIs**:
-  - `translate` library for language translation.
+  - **MyMemory API** & `translate` library for flexible and accurate language translation.
   - `dictionaryapi.dev` for animal name validation.
 - **Release Management**: `standard-version` for automated versioning and changelog generation.
 

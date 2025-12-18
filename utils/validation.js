@@ -1,11 +1,17 @@
 import { translateToEnglish } from './translate';
 
-// Keywords to identify animal-related definitions
+// Keywords to identify animal-related definitions from an English dictionary
 const ANIMAL_KEYWORDS = [
-    'mammal', 'bird', 'fish', 'insect', 'reptile', 'amphibian',
-    'creature', 'species', 'fauna', 'beast', 'livestock', 'poultry', 'arthropod',
+    'mammal', 'bird', 'fish', 'insect', 'reptile', 'amphibian', 'arthropod',
     'vertebrate', 'invertebrate', 'chilopoda', 'arachnid',
     'crustacean', 'annelid', 'mollusk', 'echinoderm', 'cnidarian', 'gastropoda', 'domestic', 'wildlife'
+];
+
+// Generic words that are not specific animal names and should be blocked.
+const BLACKLIST_KEYWORDS = [
+    'HEWAN', 'BINATANG', // Animal
+    'FAUNA', 'SATWA',    // Fauna / Wildlife
+    'MAKHLUK',           // Creature
 ];
 
 /**
@@ -16,6 +22,11 @@ const ANIMAL_KEYWORDS = [
  */
 export const isLikelyAnimal = async (indonesianWord) => {
     if (!indonesianWord) return { isValid: false, englishName: null };
+
+    // Check against the blacklist before any network requests.
+    if (BLACKLIST_KEYWORDS.includes(indonesianWord.toUpperCase())) {
+        return { isValid: false, englishName: null };
+    }
 
     let englishWord = null;
     try {
