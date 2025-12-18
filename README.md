@@ -1,7 +1,7 @@
 # 🐾 LinguaZoo
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-1.7.0-blue.svg" alt="Version" />
+  <img src="https://img.shields.io/badge/version-1.8.0-blue.svg" alt="Version" />
   <img src="https://img.shields.io/badge/React%20Native-20232A?style=for-the-badge&logo=react&logoColor=61DAFB" alt="React Native" />
   <img src="https://img.shields.io/badge/Expo-000020?style=for-the-badge&logo=expo&logoColor=white" alt="Expo" />
   <img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT" />

@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.8.0](https://github.com/rsahroni/LinguaZoo/compare/v1.7.0...v1.8.0) (2025-12-18)
+
+
+### Features
+
+* Refactor UI components and improve screen transitions ([2197fe3](https://github.com/rsahroni/LinguaZoo/commit/2197fe3734809c258a926622c762ac167be09db3))
+
 ## [1.7.0](https://github.com/rsahroni/LinguaZoo/compare/v1.6.0...v1.7.0) (2025-12-18)
 
 
