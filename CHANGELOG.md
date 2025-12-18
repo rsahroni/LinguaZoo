@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.5.0](https://github.com/rsahroni/LinguaZoo/compare/v1.4.0...v1.5.0) (2025-12-18)
+
+
+### Features
+
+* Refactor header, improve animal add flow & error handling ([946c40b](https://github.com/rsahroni/LinguaZoo/commit/946c40b41fa328b0749c018f427fcad14e755429))
+
 ## [1.4.0](https://github.com/rsahroni/LinguaZoo/compare/v1.3.0...v1.4.0) (2025-12-16)
 
 
