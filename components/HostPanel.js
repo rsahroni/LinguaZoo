@@ -1,7 +1,8 @@
 import React, { useRef } from 'react';
-import { View, Text, TextInput, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import CustomButton from './CustomButton';
 import AppHeader from './AppHeader';
+import ClearableTextInput from './ClearableTextInput';
 
 export default function HostPanel({
     word,
@@ -18,13 +19,9 @@ export default function HostPanel({
     onToggleLanguage,
     onManageAnimals,
     appVersion,
+    onShowAbout,
 }) {
     const clueInputRef = useRef(null);
-
-    const handleRandomAnimalPress = () => {
-        onRandomAnimal(); // Call the original function from the parent
-        clueInputRef.current?.focus(); // Then, immediately focus the clue input
-    };
 
     return (
         <View style={styles.pageContainer}>
@@ -34,23 +31,15 @@ export default function HostPanel({
                     Masukkan nama hewan dan <Text style={styles.italic}>clue</Text>-nya dulu:
                 </Text>
                 <View style={styles.wordInputWrapper}>
-                    <View style={styles.inputContainer}>
-                        <TextInput
-                            placeholder="Hewan (contoh: KUCING)"
-                            value={word}
-                            onChangeText={onWordChange}
-                            onBlur={onWordInputBlur}
-                            editable={!isStartingGame}
-                            style={styles.input}
-                            returnKeyType="next"
-                            onSubmitEditing={() => clueInputRef.current?.focus()}
-                        />
-                        {word.length > 0 && !isStartingGame && (
-                            <TouchableOpacity onPress={() => onWordChange('')} style={styles.clearButton}>
-                                <Text style={styles.clearButtonText}>X</Text>
-                            </TouchableOpacity>
-                        )}
-                    </View>
+                    <ClearableTextInput
+                        placeholder="Hewan (contoh: KUCING)"
+                        value={word}
+                        onChangeText={onWordChange}
+                        onBlur={onWordInputBlur}
+                        editable={!isStartingGame}
+                        returnKeyType="next"
+                        onSubmitEditing={() => clueInputRef.current?.focus()}
+                    />
                     {suggestions.length > 0 && (
                         <View style={styles.suggestionContainer}>
                             {suggestions.map((item) => (
@@ -64,21 +53,13 @@ export default function HostPanel({
                         </View>
                     )}
                 </View>
-                <View style={styles.inputContainer}>
-                    <TextInput
-                        ref={clueInputRef}
-                        placeholder="Clue (contoh: hewan berkaki empat)"
-                        value={clue}
-                        onChangeText={onClueChange}
-                        editable={!isStartingGame}
-                        style={styles.input}
-                    />
-                    {clue.length > 0 && !isStartingGame && (
-                        <TouchableOpacity onPress={() => onClueChange('')} style={styles.clearButton}>
-                            <Text style={styles.clearButtonText}>X</Text>
-                        </TouchableOpacity>
-                    )}
-                </View>
+                <ClearableTextInput
+                    ref={clueInputRef}
+                    placeholder="Clue (contoh: hewan berkaki empat)"
+                    value={clue}
+                    onChangeText={onClueChange}
+                    editable={!isStartingGame}
+                />
                 <View style={styles.row}>
                     <View style={styles.rowBtn}>
                         <CustomButton title={isStartingGame ? "Memeriksa..." : "Mulai Permainan"} onPress={onStartGame} disabled={isStartingGame} />
@@ -87,7 +68,7 @@ export default function HostPanel({
 
                 <View style={styles.row}>
                     <View style={styles.rowBtn}>
-                        <CustomButton title="Random Hewan" onPress={handleRandomAnimalPress} color="#5bc0de" />
+                        <CustomButton title="Random Hewan" onPress={onRandomAnimal} color="#5bc0de" />
                     </View>
                     <View style={styles.rowBtn}>
                         <CustomButton
@@ -100,7 +81,9 @@ export default function HostPanel({
             </ScrollView>
             <View style={styles.footerContainer}>
                 <CustomButton title="Koleksi Hewan" onPress={onManageAnimals} color="#FF6F61" />
-                <Text style={styles.versionText}>Versi {appVersion}</Text>
+                <TouchableOpacity onPress={onShowAbout}>
+                    <Text style={styles.versionText}>Versi {appVersion}</Text>
+                </TouchableOpacity>
             </View>
         </View>
     );
@@ -110,16 +93,6 @@ const styles = StyleSheet.create({
     pageContainer: { flex: 1 },
     container: { padding: 20, paddingBottom: 40 },
     label: { fontSize: 16, fontFamily: 'PlaypenSans-Regular', color: '#444', marginBottom: 8 },
-    inputContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        borderWidth: 1,
-        borderColor: '#333',
-        borderRadius: 8,
-        backgroundColor: '#fff',
-        marginBottom: 10,
-    },
-    input: { flex: 1, fontFamily: 'PlaypenSans-Regular', padding: 10, includeFontPadding: false },
     italic: { fontStyle: 'italic' },
     row: { flexDirection: 'row', gap: 10, marginBottom: 10 },
     rowBtn: { flex: 1 },
@@ -140,14 +113,6 @@ const styles = StyleSheet.create({
         borderBottomWidth: 1,
         borderBottomColor: '#ddd',
     },
-    clearButton: {
-        padding: 10,
-    },
-    clearButtonText: {
-        color: '#888',
-        fontSize: 16,
-        fontFamily: 'PlaypenSans-Bold',
-    },
     wordInputWrapper: {
         position: 'relative', // Diperlukan untuk pemosisian absolut anak
     },
@@ -162,7 +127,8 @@ const styles = StyleSheet.create({
         marginTop: 8,
         fontSize: 12,
         fontFamily: 'PlaypenSans-Regular',
-        color: '#aaa',
+        color: '#007BFF', // Standard link color
         textAlign: 'center',
+        textDecorationLine: 'underline',
     },
 });

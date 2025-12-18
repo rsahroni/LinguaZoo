@@ -1,19 +1,20 @@
 import React from 'react';
 import { View, Text, StyleSheet, FlatList, } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import CustomButton from './CustomButton';
 import { toProperCase } from '../utils/formatters';
 
 export default function AnimalList({
     animalList,
-    editAnimal,
-    editText,
     deleteAnimal,
-    language,
     ListHeaderComponent,
+    onClose,
 }) {
     return (
-        <View style={styles.pageContainer}>
-            <View style={styles.headerContainer}>{ListHeaderComponent}</View>
+        <SafeAreaView style={styles.safeArea}>
+            <View style={styles.headerContainer}>
+                {ListHeaderComponent}
+            </View>
             <FlatList
                 contentContainerStyle={styles.listContentContainer}
                 data={animalList}
@@ -27,7 +28,7 @@ export default function AnimalList({
                                 <Text style={styles.itemEnglishText}>{toProperCase(item.ENG)}</Text>
                             </View>
                             <View style={styles.actions}>
-                                <CustomButton title="Hapus" color="#d9534f" onPress={() => deleteAnimal(item)} />
+                                <CustomButton title="Hapus" color="#d9534f" onPress={() => deleteAnimal(item)} style={styles.deleteButton} textStyle={styles.deleteButtonText} />
                             </View>
                         </View>
                     );
@@ -38,14 +39,16 @@ export default function AnimalList({
                     </Text>
                 }
             />
-        </View>
+            <View style={styles.footer}>
+                <CustomButton title="Tutup" onPress={onClose} />
+            </View>
+        </SafeAreaView>
     );
 }
 
 const styles = StyleSheet.create({
-    pageContainer: { flex: 1 },
+    safeArea: { flex: 1, backgroundColor: '#FFF8E7' },
     headerContainer: {
-        paddingHorizontal: 20,
         paddingTop: 20,
         paddingBottom: 10, // Ganti marginBottom menjadi paddingBottom
         backgroundColor: '#FFF8E7', // Warna yang sama dengan latar belakang utama
@@ -57,17 +60,29 @@ const styles = StyleSheet.create({
         // Bayangan untuk Android
         elevation: 3,
     },
-    listContentContainer: { paddingHorizontal: 20, paddingTop: 10, paddingBottom: 20 },
-    row: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 10, marginBottom: 8 },
-    itemText: { fontSize: 18, fontFamily: 'PlaypenSans-Regular', color: '#333' },
+    listContentContainer: { paddingHorizontal: 20, paddingTop: 10, paddingBottom: 40 },
+    row: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 10, marginBottom: 6 },
+    itemText: { fontSize: 17, fontFamily: 'PlaypenSans-Regular', color: '#333' },
     actions: { flexDirection: 'row', gap: 8 },
     animalNameContainer: {
         flexDirection: 'row',
         alignItems: 'baseline', // Menyelaraskan teks pada baseline
         flex: 1, // Memungkinkan container mengambil ruang yang tersedia
     },
-    itemEnglishText: { fontSize: 14, fontFamily: 'PlaypenSans-Regular', color: '#888', marginLeft: 5 }, // Gaya untuk nama Inggris
-    input: { fontFamily: 'PlaypenSans-Regular', borderWidth: 1, borderColor: '#333', padding: 8, borderRadius: 8, backgroundColor: '#fff', flex: 1 },
+    itemEnglishText: { fontSize: 13, fontStyle: 'italic', fontFamily: 'PlaypenSans-Regular', color: '#888', marginLeft: 8 }, // Gaya untuk nama Inggris
     empty: { fontFamily: 'PlaypenSans-Regular', color: '#666', marginTop: 8 },
     italic: { fontStyle: 'italic', color: '#444' },
+    footer: {
+        padding: 20,
+        borderTopWidth: 1,
+        borderTopColor: '#e0e0e0',
+        backgroundColor: '#FFF8E7',
+    },
+    deleteButton: {
+        paddingVertical: 6,
+        paddingHorizontal: 10,
+    },
+    deleteButtonText: {
+        fontSize: 14,
+    },
 });

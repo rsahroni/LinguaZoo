@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { View, StyleSheet, Alert, Platform } from 'react-native';
+import { View, StyleSheet, Alert, Platform, Modal } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { StatusBar } from 'expo-status-bar';
 import * as SplashScreen from 'expo-splash-screen';
@@ -12,6 +12,7 @@ import AnimalList from './components/AnimalList';
 import ManagementHeader from './components/ManagementHeader';
 import HostPanel from './components/HostPanel';
 import useGameLogic from './hooks/useGameLogic';
+import AboutPage from './components/AboutPage';
 import { translateToEnglish } from './utils/translate';
 import { ANIMAL_SEED_DATA } from './data/seedData';
 import { isLikelyAnimal } from './utils/validation';
@@ -29,6 +30,7 @@ export default function App() {
   const [isAddingAnimal, setIsAddingAnimal] = useState(false); // Loading state for validation
   const [lastRandomAnimal, setLastRandomAnimal] = useState(null); // Track the last picked animal
   const [isAppReady, setIsAppReady] = useState(false);
+  const [isAboutVisible, setIsAboutVisible] = useState(false);
 
   const [fontsLoaded] = useFonts({
     'PlaypenSans-Regular': require('./assets/fonts/PlaypenSans-Regular.ttf'),
@@ -131,7 +133,7 @@ export default function App() {
       const name_eng_for_alert = englishName ? englishName.toUpperCase() : (await translateToEnglish(name)).toUpperCase();
       Alert.alert(
         "Tambahkan Hewan Ini?",
-        `Hore! Sepertinya ${toProperCase(name)} (Bahasa Inggris: ${toProperCase(name_eng_for_alert)}) adalah hewan sungguhan. Yakin mau menambahkannya?`,
+        `Hore! Sepertinya "${toProperCase(name)}" atau dalam Bahasa Inggris "${toProperCase(name_eng_for_alert)}" adalah hewan sungguhan. Yakin mau menambahkannya?`,
         [
           {
             text: "Jangan, deh",
@@ -287,7 +289,7 @@ export default function App() {
     // If valid, then show the confirmation prompt
     Alert.alert(
       "Hewan Baru!",
-      `Wow, "${trimmedWord}" (${englishName.toUpperCase()}) akan jadi penghuni baru! Kamu mau pakai hewan ini untuk main?`,
+      `Wow, "${trimmedWord}" atau dalam Bahasa Inggris "${englishName.toUpperCase()}" akan jadi penghuni baru! Kamu mau pakai hewan ini untuk main?`,
       [
         { text: "Pilih lagi", style: "cancel" },
         {
@@ -337,14 +339,6 @@ export default function App() {
             handleGuess={handleGuess}
             onExit={exitAndResetGame}
           />
-        ) : isManaging ? (
-          // Animal Management UI
-          <AnimalList
-            animalList={animals}
-            deleteAnimal={deleteAnimal}
-            language={language}
-            ListHeaderComponent={<ManagementHeader onBack={() => setIsManaging(false)} onAddAnimal={addAnimal} isAdding={isAddingAnimal} animalCount={animals.length} onReset={resetAnimals} />}
-          />
         ) : (
           // Main Host Panel UI
           <HostPanel
@@ -362,9 +356,27 @@ export default function App() {
             onToggleLanguage={toggleLanguage}
             onManageAnimals={() => setIsManaging(true)}
             appVersion={appConfig.expo.version}
+            onShowAbout={() => setIsAboutVisible(true)}
           />
         )}
       </View>
+
+      {/* Animal Management Modal */}
+      <Modal
+        animationType="slide"
+        visible={isManaging}
+        onRequestClose={() => setIsManaging(false)}
+      >
+        <AnimalList
+          onClose={() => setIsManaging(false)}
+          animalList={animals}
+          deleteAnimal={deleteAnimal}
+          ListHeaderComponent={<ManagementHeader onAddAnimal={addAnimal} isAdding={isAddingAnimal} animalCount={animals.length} onReset={resetAnimals} />}
+        />
+      </Modal>
+
+      {/* About Page Modal */}
+      <AboutPage isVisible={isAboutVisible} onClose={() => setIsAboutVisible(false)} appVersion={appConfig.expo.version} />
     </SafeAreaView>
   );
 }
