@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { View, Text, TextInput, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import CustomButton from './CustomButton';
 import AppHeader from './AppHeader';
@@ -19,6 +19,13 @@ export default function HostPanel({
     onManageAnimals,
     appVersion,
 }) {
+    const clueInputRef = useRef(null);
+
+    const handleRandomAnimalPress = () => {
+        onRandomAnimal(); // Call the original function from the parent
+        clueInputRef.current?.focus(); // Then, immediately focus the clue input
+    };
+
     return (
         <View style={styles.pageContainer}>
             <ScrollView contentContainerStyle={styles.container}>
@@ -35,6 +42,8 @@ export default function HostPanel({
                             onBlur={onWordInputBlur}
                             editable={!isStartingGame}
                             style={styles.input}
+                            returnKeyType="next"
+                            onSubmitEditing={() => clueInputRef.current?.focus()}
                         />
                         {word.length > 0 && !isStartingGame && (
                             <TouchableOpacity onPress={() => onWordChange('')} style={styles.clearButton}>
@@ -57,6 +66,7 @@ export default function HostPanel({
                 </View>
                 <View style={styles.inputContainer}>
                     <TextInput
+                        ref={clueInputRef}
                         placeholder="Clue (contoh: hewan berkaki empat)"
                         value={clue}
                         onChangeText={onClueChange}
@@ -77,7 +87,7 @@ export default function HostPanel({
 
                 <View style={styles.row}>
                     <View style={styles.rowBtn}>
-                        <CustomButton title="Random Hewan" onPress={onRandomAnimal} color="#5bc0de" />
+                        <CustomButton title="Random Hewan" onPress={handleRandomAnimalPress} color="#5bc0de" />
                     </View>
                     <View style={styles.rowBtn}>
                         <CustomButton

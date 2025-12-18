@@ -18,6 +18,19 @@ export default function GameBoard({
         ? Math.min(8, Math.max(5, Math.floor(word.replace(/ /g, '').length * 0.75)))
         : 6;
 
+    // --- Logic for descriptive text ---
+    const wordParts = word ? word.split(' ').filter(p => p) : [];
+    const wordCount = wordParts.length;
+    const letterCount = word ? word.replace(/ /g, '').length : 0;
+
+    let description = '';
+    if (wordCount > 1) {
+        description = `Hewan ini terdiri dari ${wordCount} kata dan punya ${letterCount} huruf.`;
+    } else if (letterCount > 0) {
+        description = `Hewan ini punya ${letterCount} huruf.`;
+    }
+    // --- End of logic ---
+
     const isWin = word && word.split('').every(ch => ch === ' ' || correctLetters.includes(ch));
     const isLose = wrongLetters.length >= maxLives;
 
@@ -43,13 +56,16 @@ export default function GameBoard({
                 <View style={styles.headerRow}>
                     <AppHeader size="large" style={{ marginBottom: 0 }} />
                 </View>
-                <Text style={styles.clue}>Clue: {clue}</Text>
+                <View style={styles.infoBox}>
+                    <Text style={styles.description}>{description}</Text>
+                    <Text style={styles.clue}>Clue-nya: {clue}</Text>
+                </View>
 
                 <WordBox word={word} correctLetters={correctLetters} />
 
                 <View style={styles.statusRow}>
-                    <Text style={styles.status}>Wrong: {wrongLetters.join(' ')}</Text>
-                    <Text style={styles.status}>Lives: {Math.max(0, maxLives - wrongLetters.length)}</Text>
+                    <Text style={styles.status}>Salah: {wrongLetters.join(' ')}</Text>
+                    <Text style={styles.status}>Kesempatan: {Math.max(0, maxLives - wrongLetters.length)}</Text>
                 </View>
 
                 {!isWin && !isLose ? (
@@ -57,7 +73,7 @@ export default function GameBoard({
                 ) : (
                     <View style={styles.resultBox}>
                         <Text style={styles.resultText}>
-                            {isWin ? 'Kamu menang! 🎉' : 'Kamu kalah! 😅'}
+                            {isWin ? 'Hore, Kamu Berhasil! 🥳🎉' : 'Yah, Coba Lagi Ya! 💪😊'}
                         </Text>
                         <Text style={styles.answer}>Jawaban: {word}</Text>
                     </View>
@@ -84,7 +100,12 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         marginBottom: 12,
     },
-    clue: { fontSize: 18, fontFamily: 'PlaypenSans-Regular', marginBottom: 16, color: '#333' },
+    infoBox: {
+        marginBottom: 16,
+        gap: 4,
+    },
+    description: { fontSize: 16, fontFamily: 'PlaypenSans-Regular', color: '#555' },
+    clue: { fontSize: 18, fontFamily: 'PlaypenSans-Regular', fontStyle: 'italic', color: '#333' },
     statusRow: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 12 },
     status: { fontSize: 16, fontFamily: 'PlaypenSans-Regular', color: '#333' },
     resultBox: { marginTop: 20, gap: 10 },

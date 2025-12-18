@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { View, StyleSheet, Alert, Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { StatusBar } from 'expo-status-bar';
 import { useFonts } from 'expo-font';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as ScreenOrientation from 'expo-screen-orientation';
@@ -295,6 +296,7 @@ export default function App() {
 
   return (
     <SafeAreaView style={styles.safe}>
+      <StatusBar hidden />
       <View style={styles.container}>
         {gameStarted ? (
           <GameBoard
