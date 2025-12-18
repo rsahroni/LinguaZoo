@@ -2,7 +2,7 @@
   "expo": {
     "name": "LinguaZoo",
     "slug": "LinguaZoo",
-    "version": "1.5.1",
+    "version": "1.6.0",
     "orientation": "portrait",
     "icon": "./assets/linguazoo-icon-v1.png",
     "userInterfaceStyle": "light",

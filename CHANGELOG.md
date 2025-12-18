@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.6.0](https://github.com/rsahroni/LinguaZoo/compare/v1.5.1...v1.6.0) (2025-12-18)
+
+
+### Features
+
+* Enhance gameplay UI, UX, and layout responsiveness ([9326082](https://github.com/rsahroni/LinguaZoo/commit/93260824ef4dea7c1b6093eb87192d9c9d125f9c))
+
 ### [1.5.1](https://github.com/rsahroni/LinguaZoo/compare/v1.5.0...v1.5.1) (2025-12-18)
 
 
