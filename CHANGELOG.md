@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.9.0](https://github.com/rsahroni/LinguaZoo/compare/v1.8.0...v1.9.0) (2026-01-19)
+
+
+### Features
+
+* add database import feature and update UI layout ([2456c9b](https://github.com/rsahroni/LinguaZoo/commit/2456c9b622edba8fd6acbeca15bc2fd9fb569108))
+
 ## [1.8.0](https://github.com/rsahroni/LinguaZoo/compare/v1.7.0...v1.8.0) (2025-12-18)
 
 
