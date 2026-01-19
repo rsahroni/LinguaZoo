@@ -12,22 +12,23 @@ export default function GameBoard({
     wrongLetters,
     handleGuess,
     onExit,
+    language,
 }) {
-    // Calculate lives based on word length: 75% of length, min 5, max 8.
-    const maxLives = word
-        ? Math.min(8, Math.max(5, Math.floor(word.replace(/ /g, '').length * 0.75)))
-        : 6;
-
     // --- Logic for descriptive text ---
     const wordParts = word ? word.split(' ').filter(p => p) : [];
     const wordCount = wordParts.length;
     const letterCount = word ? word.replace(/ /g, '').length : 0;
 
-    let description = '';
+    // Rule change: Lives equal to letter count
+    const maxLives = letterCount > 0 ? letterCount : 5;
+
+    const langName = language === 'IND' ? 'Bahasa Indonesia' : 'Bahasa Inggris';
+    let description = `Kita main pakai ${langName} ya!\n`;
+
     if (wordCount > 1) {
-        description = `Hewan ini terdiri dari ${wordCount} kata dan punya ${letterCount} huruf.`;
+        description += `Hewan ini ada ${wordCount} kata dan punya ${letterCount} huruf.`;
     } else if (letterCount > 0) {
-        description = `Hewan ini punya ${letterCount} huruf.`;
+        description += `Hewan ini punya ${letterCount} huruf.`;
     }
     // --- End of logic ---
 
@@ -61,10 +62,10 @@ export default function GameBoard({
                     <Text style={styles.clue}>Clue-nya: {clue}</Text>
                 </View>
 
-                <WordBox word={word} correctLetters={correctLetters} />
+                {/* Pass wrongLetters to WordBox to display them above the slots */}
+                <WordBox word={word} correctLetters={correctLetters} wrongLetters={wrongLetters} />
 
                 <View style={styles.statusRow}>
-                    <Text style={styles.status}>Salah: {wrongLetters.join(' ')}</Text>
                     <Text style={styles.status}>Kesempatan: {Math.max(0, maxLives - wrongLetters.length)}</Text>
                 </View>
 
@@ -106,7 +107,7 @@ const styles = StyleSheet.create({
     },
     description: { fontSize: 16, fontFamily: 'PlaypenSans-Regular', color: '#555' },
     clue: { fontSize: 18, fontFamily: 'PlaypenSans-Regular', fontStyle: 'italic', color: '#333' },
-    statusRow: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 12 },
+    statusRow: { flexDirection: 'row', justifyContent: 'center', marginTop: 12 },
     status: { fontSize: 16, fontFamily: 'PlaypenSans-Regular', color: '#333' },
     resultBox: { marginTop: 20, gap: 10 },
     resultText: { fontSize: 20, fontFamily: 'PlaypenSans-Bold' },

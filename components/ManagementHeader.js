@@ -1,16 +1,14 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, Keyboard } from 'react-native';
+import React from 'react';
+import { View, Text, StyleSheet, Keyboard, TouchableOpacity } from 'react-native';
 import CustomButton from './CustomButton';
 import ClearableTextInput from './ClearableTextInput';
 
-export default function ManagementHeader({ onAddAnimal, isAdding, animalCount, onReset }) {
-    const [newAnimal, setNewAnimal] = useState('');
-
+export default function ManagementHeader({ onAddAnimal, isAdding, animalCount, onOptionsPress, searchTerm, onSearchChange, isDuplicate }) {
     const handleAdd = async () => { // Ubah menjadi async
-        if (newAnimal.trim()) {
-            const success = await onAddAnimal(newAnimal); // Tunggu hasil dari onAddAnimal
+        if (searchTerm.trim()) {
+            const success = await onAddAnimal(searchTerm, null); // Pass null as clue
             if (success) {
-                setNewAnimal(''); // Kosongkan input hanya jika berhasil
+                onSearchChange(''); // Kosongkan input hanya jika berhasil
                 Keyboard.dismiss(); // Close the keyboard on success
             }
         }
@@ -20,22 +18,28 @@ export default function ManagementHeader({ onAddAnimal, isAdding, animalCount, o
         <View style={styles.container}>
             <View style={styles.headerRow}>
                 <Text style={styles.title}>Koleksi Hewan</Text>
+                <TouchableOpacity onPress={onOptionsPress} style={styles.optionsButton}>
+                    <Text style={styles.optionsButtonText}>⚙️</Text>
+                </TouchableOpacity>
             </View>
-            <Text style={styles.label}>Tambah hewan (Indonesia):</Text>
+            <Text style={styles.label}>Cari atau tambah hewan (Indonesia):</Text>
             <ClearableTextInput
                 placeholder="Contoh: KUCING"
-                value={newAnimal}
-                onChangeText={setNewAnimal}
+                value={searchTerm}
+                onChangeText={onSearchChange}
                 onSubmitEditing={handleAdd}
                 editable={!isAdding}
                 returnKeyType="done"
             />
-            <CustomButton title={isAdding ? "Memeriksa..." : "Tambah"} onPress={handleAdd} disabled={isAdding || newAnimal.trim() === ''} />
+            <CustomButton
+                title={isAdding ? "Memeriksa..." : (isDuplicate ? "Sudah Ada" : "Tambah")}
+                onPress={handleAdd}
+                disabled={isAdding || searchTerm.trim() === '' || isDuplicate}
+            />
             <View style={styles.listTitleContainer}>
                 <Text style={[styles.title, { marginTop: 10, fontSize: 18, marginBottom: 0 }]}>Daftar Hewan</Text>
                 <View style={styles.rightHeaderItems}>
                     <Text style={styles.countText}>Total: {animalCount}</Text>
-                    <CustomButton title="Reset" onPress={onReset} color="#e74c3c" style={styles.resetButton} textStyle={styles.resetButtonText} />
                 </View>
             </View>
         </View>
@@ -50,7 +54,18 @@ const styles = StyleSheet.create({
     listTitleContainer: {
         flexDirection: 'row',
         justifyContent: 'space-between',
-        alignItems: 'baseline',
+        alignItems: 'center',
+    },
+    listTitle: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 8,
+    },
+    optionsButton: {
+        padding: 5,
+    },
+    optionsButtonText: {
+        fontSize: 22,
     },
     countText: {
         fontFamily: 'PlaypenSans-Regular',

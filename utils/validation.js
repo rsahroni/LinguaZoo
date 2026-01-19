@@ -73,3 +73,27 @@ export const isLikelyAnimal = async (indonesianWord) => {
         return { isValid: false, englishName: englishWord, errorType: 'unknown' };
     }
 };
+
+/**
+ * Validates if a given word is likely a valid animal name in English directly.
+ * @param {string} englishWord The word in English to validate.
+ * @returns {Promise<{isValid: boolean, errorType?: 'network' | 'unknown'}>}
+ */
+export const isLikelyEnglishAnimal = async (englishWord) => {
+    if (!englishWord) return { isValid: false };
+
+    try {
+        const response = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${englishWord.toLowerCase()}`);
+
+        if (!response.ok) {
+            return { isValid: false };
+        }
+
+        const data = await response.json();
+        const definitions = JSON.stringify(data[0].meanings).toLowerCase();
+        const isValid = ANIMAL_KEYWORDS.some(keyword => definitions.includes(keyword));
+        return { isValid };
+    } catch (error) {
+        return { isValid: false, errorType: 'network' };
+    }
+};

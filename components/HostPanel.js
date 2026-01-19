@@ -15,6 +15,7 @@ export default function HostPanel({
     onSuggestionPress,
     onStartGame,
     onRandomAnimal,
+    onSinglePlayer,
     isStartingGame,
     onToggleLanguage,
     onManageAnimals,
@@ -27,8 +28,10 @@ export default function HostPanel({
         <View style={styles.pageContainer}>
             <ScrollView contentContainerStyle={styles.container}>
                 <AppHeader size="large" />
+
                 <Text style={styles.label}>
-                    Masukkan nama hewan dan <Text style={styles.italic}>clue</Text>-nya dulu:
+                    Masukkan nama hewan{'\n'}
+                    dalam <Text style={styles.bold}>{language === 'IND' ? 'Bahasa Indonesia' : 'Bahasa Inggris'}</Text> dan <Text style={styles.italic}>clue</Text>-nya dulu:
                 </Text>
                 <View style={styles.wordInputWrapper}>
                     <ClearableTextInput
@@ -78,6 +81,12 @@ export default function HostPanel({
                     </View>
                 </View>
 
+                <View style={styles.row}>
+                    <View style={styles.rowBtn}>
+                        <CustomButton title="Main Sendiri (Lawan Bot) 🤖" onPress={onSinglePlayer} color="#6f42c1" />
+                    </View>
+                </View>
+
             </ScrollView>
             <View style={styles.footerContainer}>
                 <CustomButton title="Koleksi Hewan" onPress={onManageAnimals} color="#FF6F61" />
@@ -94,6 +103,7 @@ const styles = StyleSheet.create({
     container: { padding: 20, paddingBottom: 40 },
     label: { fontSize: 16, fontFamily: 'PlaypenSans-Regular', color: '#444', marginBottom: 8 },
     italic: { fontStyle: 'italic' },
+    bold: { fontFamily: 'PlaypenSans-Bold' },
     row: { flexDirection: 'row', gap: 10, marginBottom: 10 },
     rowBtn: { flex: 1 },
     suggestionContainer: {
